@@ -74,5 +74,64 @@ async function register(req, res) {
   }
 }
 
+async function login(req, res) {
+  const { identifier, password } = req.body;
 
-export { register };
+  if (!identifier) {
+    return res.status(400).json({
+      error: {
+        code: "IDENTIFIER_REQUIRED",
+        message: "Identifier field cannot be empty!",
+      },
+    });
+  }
+
+  if (!password) {
+    return res.status(400).json({
+      error: {
+        code: "PASSWORD_REQUIRED",
+        message: "Password field cannot be empty!",
+      },
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      "SELECT id,username,email,password_hash FROM users WHERE username = $1 OR email = $1",
+      [identifier],
+    );
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({
+        error: {
+          code: "INVALID_CREDENTIALS",
+          message: "Invalid username/email or password",
+        },
+      });
+    }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+
+    if (!match) {
+      return res.status(401).json({
+        error: {
+          code: "INVALID_CREDENTIALS",
+          message: "Invalid username/email or password",
+        },
+      });
+    }
+
+    return res.status(200).json({ message: "Login successful" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong",
+      },
+    });
+  }
+}
+
+export { register, login };
