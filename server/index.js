@@ -2,6 +2,7 @@ import express from "express";
 import pool from "./db/index.js";
 import session from "express-session";
 import authRouter from "./routes/authRoutes.js";
+import repoRouter from "./routes/repoRoutes.js";
 
 const app = express();
 const port = 3000;
@@ -22,6 +23,7 @@ app.use(
 );
 
 app.use("/api/auth", authRouter);
+app.use("/api/repos", repoRouter);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok" });
