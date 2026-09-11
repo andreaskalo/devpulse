@@ -122,6 +122,8 @@ async function login(req, res) {
       });
     }
 
+    req.session.userId = user.id;
+
     return res.status(200).json({ message: "Login successful" });
   } catch (error) {
     console.error(error);
@@ -134,4 +136,64 @@ async function login(req, res) {
   }
 }
 
-export { register, login };
+async function getCurrentUser(req, res) {
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({
+      error: {
+        code: "NOT_AUTHENTICATED",
+        message: "User is not authenticated",
+      },
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      "SELECT id,username,email,created_at FROM users WHERE id = $1",
+      [userId],
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({
+        error: {
+          code: "USER_NOT_FOUND",
+          message: "User not found!",
+        },
+      });
+    }
+
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong",
+      },
+    });
+  }
+}
+
+function logout(req, res) {
+  req.session.destroy((error) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        },
+      });
+    }
+    res.clearCookie("connect.sid");
+    return res.status(200).json({
+      message: "Logout successful",
+    });
+  });
+}
+
+export { register, login, getCurrentUser, logout };
