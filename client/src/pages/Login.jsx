@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useAuth from "../hooks/useAuth";
 
 function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -7,50 +8,26 @@ function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { login } = useAuth();
+
   async function handleSubmit(e) {
     e.preventDefault();
 
     setError("");
     setSuccess("");
-
-    if (!identifier) {
-      setError("Please insert username or email.");
-      return;
-    }
-
-    if (!password) {
-      setError("Please insert password.");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ identifier, password }),
-      });
+      const result = await login(identifier, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data?.error?.message ?? "Login failed.");
+      if (!result.success) {
+        setError(result.error);
         return;
       }
 
-      setSuccess(data?.message ?? "Login successful.");
-
-      const meResponse = await fetch("/api/auth/me");
-      const meData = await meResponse.json();
-
+      setSuccess("Login successful.");
       setIdentifier("");
       setPassword("");
-    } catch (error) {
-      console.error(error);
-      setError("Unable to connect to the server.");
     } finally {
       setIsLoading(false);
     }
