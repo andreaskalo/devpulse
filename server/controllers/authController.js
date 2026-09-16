@@ -138,6 +138,7 @@ async function login(req, res) {
 
 async function getCurrentUser(req, res) {
   const userId = req.session.userId;
+
   if (!userId) {
     return res.status(401).json({
       error: {
