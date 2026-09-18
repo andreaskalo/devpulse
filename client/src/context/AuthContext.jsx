@@ -6,7 +6,7 @@ function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  async function login(identifier, password) {    
+  async function login(identifier, password) {
     if (!identifier) {
       return {
         success: false,
@@ -73,6 +73,23 @@ function AuthProvider({ children }) {
     }
   }
 
+  async function logout() {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(data.message);
+      return;
+    }
+
+    setCurrentUser(null);
+
+    console.log(data);
+  }
+
   useEffect(() => {
     getCurrentUser();
   }, []);
@@ -83,6 +100,7 @@ function AuthProvider({ children }) {
         currentUser,
         isAuthLoading,
         login,
+        logout,
       }}
     >
       {children}
