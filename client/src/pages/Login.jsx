@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -9,6 +10,7 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -28,6 +30,8 @@ function Login() {
       setSuccess("Login successful.");
       setIdentifier("");
       setPassword("");
+
+      navigate("/dashboard", { replace: true });
     } finally {
       setIsLoading(false);
     }

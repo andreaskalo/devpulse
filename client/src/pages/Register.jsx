@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -7,6 +8,8 @@ function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -35,6 +38,7 @@ function Register() {
       }
 
       setSuccess(data.message);
+      navigate("/login");
       setUsername("");
       setEmail("");
       setPassword("");
