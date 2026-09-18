@@ -6,7 +6,7 @@ function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  async function login(identifier, password) {
+  async function login(identifier, password) {    
     if (!identifier) {
       return {
         success: false,
