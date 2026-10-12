@@ -4,6 +4,7 @@ import Login from "./pages/Login.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import PublicOnlyRoute from "./components/PublicOnlyRoute.jsx";
+import AppLayout from "./components/AppLayout.jsx";
 
 function App() {
   return (
@@ -34,13 +35,15 @@ function App() {
           }
         />
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* <Route path="/saved" element={<SavedRepos />} />` */}
+        </Route>
       </Routes>
     </BrowserRouter>
   );
