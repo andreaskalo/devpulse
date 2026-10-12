@@ -25,7 +25,7 @@ app.use(
 
 app.use("/api/auth", authRouter);
 app.use("/api/repos", repoRouter);
-app.use("/api/github/repos", githubRouter);
+app.use("/api/github", githubRouter);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok" });
