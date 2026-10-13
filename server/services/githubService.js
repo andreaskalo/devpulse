@@ -182,10 +182,55 @@ async function getRepoPulls(owner, repo, page, perPage, pullState) {
   return mappedData;
 }
 
+async function searchRepositories(query) {
+  const encodedQuery = encodeURIComponent(query);
+
+  const requestURL = `https://api.github.com/search/repositories?q=${encodedQuery}`;
+
+  const response = await fetch(requestURL, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2026-03-10",
+      "User-Agent": "DevPulse",
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = new Error(response.statusText);
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  const mappedRepositories = data.items.map((item) => {
+    return {
+      id: item.id,
+      ownerLogin: item.owner.login,
+      ownerAvatarUrl: item.owner.avatar_url,
+      ownerUrl: item.owner.html_url,
+      name: item.name,
+      description: item.description,
+      url: item.html_url,
+      language: item.language,
+      stars: item.stargazers_count,
+      forks: item.forks_count,
+      openIssues: item.open_issues_count,
+      updatedAt: item.updated_at,
+    };
+  });
+
+  return {
+    totalCount: data.total_count,
+    repositories: mappedRepositories,
+  };
+}
+
 export {
   getRepository,
   getRepoCommits,
   getRepoContributors,
   getRepoIssues,
   getRepoPulls,
+  searchRepositories,
 };

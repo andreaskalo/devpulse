@@ -87,7 +87,6 @@ function AuthProvider({ children }) {
 
     setCurrentUser(null);
 
-    console.log(data);
   }
 
   useEffect(() => {

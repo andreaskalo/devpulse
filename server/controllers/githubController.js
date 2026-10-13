@@ -4,6 +4,7 @@ import {
   getRepoContributors,
   getRepoIssues,
   getRepoPulls,
+  searchRepositories,
 } from "../services/githubService.js";
 import parsePagination from "../utils/pagination.js";
 
@@ -223,10 +224,44 @@ async function getRepositoryPulls(req, res) {
   }
 }
 
+async function searchRepos(req, res) {
+  const { query } = req.query;
+
+  if (!query || !query.trim()) {
+    return res.status(422).json({
+      error: {
+        code: "UNPROCESSABLE_ENTITY",
+        message: "Unprocessable entity!",
+      },
+    });
+  }
+  try {
+    const data = await searchRepositories(query.trim());
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    if (error.status === 403) {
+      return res.status(403).json({
+        error: {
+          code: "RATE_LIMIT_EXCEEDED",
+          message: "Rate limit exceeded",
+        },
+      });
+    }
+    return res.status(500).json({
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong",
+      },
+    });
+  }
+}
+
 export {
   getRepo,
   getRepositoryCommits,
   getRepositoryContributors,
   getRepositoryIssues,
   getRepositoryPulls,
+  searchRepos,
 };
