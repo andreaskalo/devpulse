@@ -1,11 +1,20 @@
 import { Star, GitFork, Code, CircleDot } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function RepositoryCard({ repository }) {
   const { ownerLogin, name, description, language, stars, forks, openIssues } =
     repository;
+  const navigate = useNavigate();
+
+  function handleCardClick() {
+    navigate(`/repos/${ownerLogin}/${name}`);
+  }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-md hover:shadow-xl transition">
+    <div
+      className="bg-white border border-slate-200 rounded-xl p-5 shadow-md hover:shadow-xl transition cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="flex items-center gap-1">
         <span className="font-semibold text-slate-900 text-xl">{name}</span>
         <span>/</span>

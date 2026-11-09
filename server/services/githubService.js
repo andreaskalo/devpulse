@@ -1,14 +1,12 @@
+import getGitHubHeaders from "../helpers/getGitHubHeaders.js";
+
 const baseURL = "https://api.github.com";
 
 async function getRepository(owner, repo) {
   const requestURL = `${baseURL}/repos/${owner}/${repo}`;
 
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {
@@ -35,10 +33,10 @@ async function getRepository(owner, repo) {
     name: name,
     url: html_url,
     forks: forks_count,
-    tars: stargazers_count,
+    stars: stargazers_count,
     description: description,
-    open_issues_count: open_issues_count,
-    anguage: language,
+    openIssues: open_issues_count,
+    language: language,
   };
 }
 
@@ -188,12 +186,7 @@ async function searchRepositories(query) {
   const requestURL = `https://api.github.com/search/repositories?q=${encodedQuery}`;
 
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {
