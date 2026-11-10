@@ -96,9 +96,7 @@ async function getRepositoryContributors(req, res) {
       pagination.page,
       pagination.perPage,
     );
-    return res.status(200).json({
-      data,
-    });
+    return res.status(200).json(data);
   } catch (error) {
     console.error(error);
     if (error.status === 404) {
@@ -141,9 +139,7 @@ async function getRepositoryIssues(req, res) {
       pagination.perPage,
     );
 
-    return res.status(200).json({
-      data,
-    });
+    return res.status(200).json(data);
   } catch (error) {
     console.error(error);
     if (error.status === 404) {
@@ -198,9 +194,7 @@ async function getRepositoryPulls(req, res) {
       pullState,
     );
 
-    return res.status(200).json({
-      data,
-    });
+    return res.status(200).json(data);
   } catch (error) {
     console.error(error);
     if (error.status === 404) {

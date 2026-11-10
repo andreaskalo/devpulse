@@ -11,10 +11,14 @@ function Navbar() {
 
   return (
     <nav className="flex items-center justify-between px-6 py-2 bg-white border-b border-slate-200">
-      <div className="flex items-center gap-2">
-        <img src={logo} className="w-12 h-12" alt="DevPulse logo" />
-        <span>DevPulse</span>
-      </div>
+      <NavLink to={"/dashboard"}>
+        <div className="flex items-center gap-2">
+          <img src={logo} className="w-12 h-12" alt="DevPulse logo" />
+
+          <span>DevPulse</span>
+        </div>
+      </NavLink>
+
       <div className="flex items-center gap-10">
         <NavLink
           to={"/dashboard"}
@@ -38,8 +42,15 @@ function Navbar() {
         </NavLink>
       </div>
       <div className="flex items-center gap-10">
-        <span className="text-slate-700 font-medium">{currentUser?.username}</span>
-        <button onClick={handleLogout} className="hover:text-red-500 cursor-pointer">Logout</button>
+        <span className="text-slate-700 font-medium">
+          {currentUser?.username}
+        </span>
+        <button
+          onClick={handleLogout}
+          className="hover:text-red-500 cursor-pointer"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );

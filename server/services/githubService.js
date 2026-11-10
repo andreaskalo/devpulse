@@ -43,11 +43,7 @@ async function getRepository(owner, repo) {
 async function getRepoCommits(owner, repo, page, per_page) {
   const requestURL = `${baseURL}/repos/${owner}/${repo}/commits?page=${page}&per_page=${per_page}`;
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {
@@ -76,11 +72,7 @@ async function getRepoContributors(owner, repo, page, perPage) {
   const requestURL = `${baseURL}/repos/${owner}/${repo}/contributors?page=${page}&per_page=${perPage}`;
 
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {

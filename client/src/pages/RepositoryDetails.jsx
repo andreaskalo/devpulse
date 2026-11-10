@@ -13,9 +13,22 @@ function RepositoryDetails() {
   const [isCommitsLoading, setIsCommitsLoading] = useState(false);
   const [commitsError, setCommitsError] = useState(null);
 
+  const [contributors, setContributors] = useState([]);
+  const [isContributorsLoading, setIsContributorsLoading] = useState(false);
+  const [contributorsError, setContributorsError] = useState(null);
+
+  const [issues, setIssues] = useState([]);
+  const [isIssuesLoading, setIsIssuesLoading] = useState(false);
+  const [issuesError, setIssuesError] = useState(null);
+
+  const [pullRequests, setPullRequests] = useState([]);
+  const [isPullRequestsLoading, setIsPullRequestsLoading] = useState(false);
+  const [pullRequestsError, setPullRequestsError] = useState(null);
+
   useEffect(() => {
     async function fetchRepository() {
       try {
+        setRepository(null);
         setError(null);
         setIsLoading(true);
         const response = await fetch(`/api/github/repos/${repoOwner}/${repo}`);
@@ -66,6 +79,95 @@ function RepositoryDetails() {
       }
     }
     fetchCommits();
+  }, [repoOwner, repo]);
+
+  useEffect(() => {
+    async function fetchContributors() {
+      try {
+        setContributors([]);
+        setContributorsError(null);
+        setIsContributorsLoading(true);
+
+        const response = await fetch(
+          `/api/github/repos/${repoOwner}/${repo}/contributors`,
+        );
+
+        if (!response.ok) {
+          const error = new Error(response.statusText);
+          error.status = response.status;
+          throw error;
+        }
+        const data = await response.json();
+
+        setContributors(data);
+      } catch (error) {
+        setContributorsError(error.message);
+        console.log("error", error);
+      } finally {
+        setIsContributorsLoading(false);
+      }
+    }
+    fetchContributors();
+  }, [repoOwner, repo]);
+
+  useEffect(() => {
+    async function fetchIssues() {
+      try {
+        setIssues([]);
+        setIssuesError(null);
+        setIsIssuesLoading(true);
+
+        const response = await fetch(
+          `/api/github/repos/${repoOwner}/${repo}/issues`,
+        );
+
+        if (!response.ok) {
+          const error = new Error(response.statusText);
+          error.status = response.status;
+          throw error;
+        }
+
+        const data = await response.json();
+
+        setIssues(data);
+      } catch (error) {
+        console.error(error);
+        setIssuesError(error.message);
+      } finally {
+        setIsIssuesLoading(false);
+      }
+    }
+    fetchIssues();
+  }, [repoOwner, repo]);
+
+  useEffect(() => {
+    async function fetchPullRequests() {
+      try {
+        setPullRequests([]);
+        setPullRequestsError(null);
+        setIsPullRequestsLoading(true);
+
+        const response = await fetch(
+          `/api/github/repos/${repoOwner}/${repo}/pulls`,
+        );
+
+        if (!response.ok) {
+          const error = new Error(response.statusText);
+          error.status = response.status;
+          throw error;
+        }
+
+        const data = await response.json();
+        setPullRequests(data);
+        console.log("data:", data);
+      } catch (error) {
+        setPullRequestsError(error.message);
+        console.error(error);
+      } finally {
+        setIsPullRequestsLoading(false);
+      }
+    }
+    fetchPullRequests();
   }, [repoOwner, repo]);
 
   if (isLoading) {
@@ -131,47 +233,229 @@ function RepositoryDetails() {
           </a>
         </div>
       </header>
-      <section
-        className="
-                w-full
-                max-w-7xl
-                mx-auto
+      <div className="flex flex-col md:flex-row  w-full max-w-7xl mx-auto gap-8">
+        <section
+          className="
+                flex
+                flex-col
+                flex-1
                 px-6
                 pb-8"
-      >
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">
-          Recent Commits
-        </h2>
-        {commitsError && <div>There's an error: {commitsError}</div>}
-        {isCommitsLoading && <div>Commits are loading...</div>}
-        {commits.length === 0 && !isCommitsLoading && !commitsError && (
-          <div>No commits found!</div>
-        )}
-        {commits.map((commit) => {
-          const message = commit.message.split("\n")[0];
-          const date = new Date(commit.date);
-          const localeDate = date.toLocaleDateString();
-          return (
-            <div key={commit.sha} className="border-b border-slate-200 py-4">
-              <a
-                href={commit.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cyan-400"
-              >
-                {message}
-              </a>
-              <div className="flex gap-1 text-sm text-slate-500 mt-1">
-                <span>{commit.author_name}</span>
-                {commit.author_username && (
-                  <span>(@{commit.author_username})</span>
-                )}
-                •<span>{localeDate}</span>
+        >
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">
+            Recent Commits
+          </h2>
+          {commitsError && <div>There's an error: {commitsError}</div>}
+          {isCommitsLoading && <div>Commits are loading...</div>}
+          {commits.length === 0 && !isCommitsLoading && !commitsError && (
+            <div>No commits found!</div>
+          )}
+          {commits.map((commit) => {
+            const message = commit.message.split("\n")[0];
+            const date = new Date(commit.date);
+            const localeDate = date.toLocaleDateString();
+            return (
+              <div key={commit.sha} className="border-b border-slate-200 py-4">
+                <a
+                  href={commit.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400"
+                >
+                  {message}
+                </a>
+                <div className="flex gap-1 text-sm text-slate-500 mt-1">
+                  <span>{commit.author_name}</span>
+                  {commit.author_username && (
+                    <span>(@{commit.author_username})</span>
+                  )}
+                  •<span>{localeDate}</span>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </section>
+            );
+          })}
+        </section>
+        <section
+          className="
+                flex
+                flex-col
+                flex-[1/2]
+                px-6
+                pb-8"
+        >
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">
+            Contributors
+          </h2>
+          {contributorsError && (
+            <div>There's an error: {contributorsError}</div>
+          )}
+          {isContributorsLoading && <div>Contributors are loading...</div>}
+          {contributors.length === 0 &&
+            !isContributorsLoading &&
+            !contributorsError && <div>No contributors found!</div>}
+          {contributors.map((contributor) => {
+            return (
+              <div
+                key={contributor.username}
+                className="border-b border-slate-200 py-4"
+              >
+                <a
+                  href={contributor.profileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={contributor.avatarUrl}
+                      className="rounded-full w-10 h-10"
+                      alt={`${contributor.username} avatar`}
+                    ></img>
+                    <span className="">{contributor.username}</span>
+                  </div>
+                </a>
+                <div className="flex gap-1 text-sm text-slate-500 mt-1">
+                  Contributions:
+                  <span>{contributor.contributions}</span>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+        <section
+          className="
+                flex
+                flex-col
+                flex-1
+                px-6
+                pb-8"
+        >
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Issues</h2>
+          {issuesError && <div>There's an error:{issuesError}</div>}
+          {isIssuesLoading && <div>Issues loading...</div>}
+          {issues.length === 0 && !isIssuesLoading && !issuesError && (
+            <div>No issues found!</div>
+          )}
+          {issues.map((issue) => {
+            return (
+              <div
+                key={issue.issueNumber}
+                className="flex flex-col border-b border-slate-200 py-4"
+              >
+                <div className="flex gap-1">
+                  <span>#{issue.issueNumber}</span>•
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${issue.issueState === "open" ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"}`}
+                  >
+                    {issue.issueState}
+                  </span>
+                </div>
+                <a
+                  href={issue.issueUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400"
+                >
+                  <span className="">{issue.title}</span>
+                </a>
+                <div className="flex gap-1">
+                  <span className="italic">author:</span>
+
+                  <a
+                    href={issue.authorProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-400"
+                  >
+                    <span>{issue.authorUsername}</span>
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+        <section
+          className="
+                flex
+                flex-col
+                flex-1
+                px-6
+                pb-8"
+        >
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">
+            Pull Requests
+          </h2>
+          {pullRequestsError && <div>There's an error:{pullRequestsError}</div>}
+          {isPullRequestsLoading && <div>Pull requests loading...</div>}
+          {pullRequests.length === 0 &&
+            !isPullRequestsLoading &&
+            !pullRequestsError && <div>No pull requests found!</div>}
+          {pullRequests.map((pullRequest) => {
+            let status;
+            let badgeClassName;
+
+            if (pullRequest.draft) {
+              status = "draft";
+            } else if (pullRequest.mergedAt != null) {
+              status = "merged";
+            } else if (pullRequest.state === "open") {
+              status = "open";
+            } else if (pullRequest.state === "closed") {
+              status = "closed";
+            }
+
+            if (status === "open") {
+              badgeClassName = "text-green-700 bg-green-100";
+            } else if (status === "closed") {
+              badgeClassName = "text-red-700 bg-red-100";
+            } else if (status === "merged") {
+              badgeClassName = "text-yellow-700 bg-yellow-100";
+            } else {
+              badgeClassName = "text-gray-700 bg-gray-100";
+            }
+
+            return (
+              <div
+                key={pullRequest.number}
+                className="flex flex-col border-b border-slate-200 py-4"
+              >
+                <div className="flex gap-1">
+                  <span>#{pullRequest.number}</span>•
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${badgeClassName}`}
+                  >
+                    {status}
+                  </span>
+                </div>
+                <a
+                  href={pullRequest.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400"
+                >
+                  <span className="">{pullRequest.title}</span>
+                </a>
+                <div className="flex gap-1 items-center">
+                  <img
+                    src={pullRequest.authorAvatarUrl}
+                    className="rounded-full w-10 h-10"
+                    alt={`${pullRequest.authorUsername} avatar`}
+                  ></img>
+
+                  <a
+                    href={pullRequest.authorProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-400"
+                  >
+                    <span>{pullRequest.authorUsername}</span>
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      </div>
     </div>
   );
 }
