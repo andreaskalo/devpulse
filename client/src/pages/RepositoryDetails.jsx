@@ -42,6 +42,9 @@ function RepositoryDetails() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
   useEffect(() => {
     if (!repository) return;
     async function getSavedRepos() {
@@ -220,6 +223,7 @@ function RepositoryDetails() {
   async function handleSaveRepository() {
     try {
       setSaveError(null);
+      setDeleteError(null);
       setIsSaving(true);
 
       const response = await fetch("/api/repos/", {
@@ -239,11 +243,39 @@ function RepositoryDetails() {
         error.status = response.status;
         throw error;
       }
+
+      const data = await response.json();
+      setSavedRepository(data);
     } catch (error) {
       setSaveError(error.message);
       console.error(error);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleDeleteRepository() {
+    if (!savedRepository) return;
+    try {
+      setSaveError(null);
+      setDeleteError(null);
+      setIsDeleting(true);
+
+      const response = await fetch(`/api/repos/${savedRepository.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = new Error(response.statusText);
+        error.status = response.status;
+        throw error;
+      }
+      setSavedRepository(null);
+    } catch (error) {
+      console.error(error);
+      setDeleteError(error.message);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -295,18 +327,36 @@ function RepositoryDetails() {
 
         <div className="flex gap-2 items-center">
           <div>
-            {saveError && <p>{saveError}</p>}
+            {saveError && (
+              <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                {saveError}
+              </div>
+            )}
+
+            {deleteError && (
+              <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                {deleteError}
+              </div>
+            )}
             <button
-              onClick={handleSaveRepository}
-              disabled={isSaving || savedRepository !== null}
-              className={`px-4 py-2
+              onClick={
+                !savedRepository ? handleSaveRepository : handleDeleteRepository
+              }
+              disabled={isSaving || isDeleting || isSavedRepositoriesLoading}
+              className="px-4 py-2
                         border border-slate-300
                         rounded-lg
                         font-medium
                         hover:bg-slate-50
-                        transition ${isSaving || savedRepository ? "cursor-not-allowed" : "cursor-pointer"}`}
+                        transition"
             >
-              {isSaving ? "Saving..." : savedRepository ? "Saved" : "Save"}
+              {isSaving
+                ? "Saving..."
+                : isDeleting
+                  ? "Deleting..."
+                  : savedRepository
+                    ? "Delete"
+                    : "Save"}
             </button>
           </div>
           <div>
