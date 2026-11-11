@@ -113,10 +113,8 @@ async function deleteSavedRepo(req, res) {
     }
 
     return res.status(200).json({
-      error: {
-        code: "REPOSITORY_DELETED_SUCCESFULLY",
-        message: "Repository deleted successfully!",
-      },
+      code: "REPOSITORY_DELETED_SUCCESFULLY",
+      message: "Repository deleted successfully!",
     });
   } catch (error) {
     console.error(error);
