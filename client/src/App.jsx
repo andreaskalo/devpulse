@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import PublicOnlyRoute from "./components/PublicOnlyRoute.jsx";
 import AppLayout from "./components/AppLayout.jsx";
 import SavedRepos from "./pages/SavedRepos.jsx";
+import RepositoryDetails from "./pages/RepositoryDetails.jsx";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/saved" element={<SavedRepos />} />
+          <Route path="/repos/:repoOwner/:repo" element={<RepositoryDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>

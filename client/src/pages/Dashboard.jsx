@@ -113,8 +113,12 @@ function Dashboard() {
           ))}
         </div>
       )}
-
-      {totalCount !== null && <div>Total: {totalCount}</div>}
+      {totalCount === null && !isLoading && (
+        <div className="h-full flex justify-center text-2xl font-bold text-slate-600">
+          Please search for a repository to show details.
+        </div>
+      )}
+      {totalCount === 0 && !isLoading && <div>No repository found.</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {repositories.map((repository) => {
           return <RepositoryCard key={repository.id} repository={repository} />;
