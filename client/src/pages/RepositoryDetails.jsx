@@ -1,6 +1,7 @@
 import { CircleDot, Code, GitFork, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 function RepositoryDetails() {
   const { repoOwner, repo } = useParams();
@@ -12,18 +13,26 @@ function RepositoryDetails() {
   const [commits, setCommits] = useState([]);
   const [isCommitsLoading, setIsCommitsLoading] = useState(false);
   const [commitsError, setCommitsError] = useState(null);
+  const [commitsPage, setCommitsPage] = useState(1);
+  const commitsPerPage = 10;
 
   const [contributors, setContributors] = useState([]);
   const [isContributorsLoading, setIsContributorsLoading] = useState(false);
   const [contributorsError, setContributorsError] = useState(null);
+  const [contributorsPage, setContributorsPage] = useState(1);
+  const contributorsPerPage = 10;
 
   const [issues, setIssues] = useState([]);
   const [isIssuesLoading, setIsIssuesLoading] = useState(false);
   const [issuesError, setIssuesError] = useState(null);
+  const [issuesPage, setIssuesPage] = useState(1);
+  const issuesPerPage = 10;
 
   const [pullRequests, setPullRequests] = useState([]);
   const [isPullRequestsLoading, setIsPullRequestsLoading] = useState(false);
   const [pullRequestsError, setPullRequestsError] = useState(null);
+  const [pullRequestsPage, setPullRequestsPage] = useState(1);
+  const pullRequestsPerPage = 10;
 
   useEffect(() => {
     async function fetchRepository() {
@@ -60,8 +69,10 @@ function RepositoryDetails() {
         setIsCommitsLoading(true);
 
         const response = await fetch(
-          `/api/github/repos/${repoOwner}/${repo}/commits`,
+          `/api/github/repos/${repoOwner}/${repo}/commits?page=${commitsPage}&per_page=${commitsPerPage}`,
         );
+
+        console.log("res:", response);
 
         if (!response.ok) {
           const error = new Error(response.statusText);
@@ -79,7 +90,7 @@ function RepositoryDetails() {
       }
     }
     fetchCommits();
-  }, [repoOwner, repo]);
+  }, [repoOwner, repo, commitsPage]);
 
   useEffect(() => {
     async function fetchContributors() {
@@ -274,6 +285,15 @@ function RepositoryDetails() {
               </div>
             );
           })}
+          {(commits.length > 0 || commitsPage > 1) && (
+            <Pagination
+              currentPage={commitsPage}
+              setCurrentPage={setCommitsPage}
+              dataPerPage={commitsPerPage}
+              isDataLoading={isCommitsLoading}
+              data={commits}
+            />
+          )}
         </section>
         <section
           className="
@@ -321,6 +341,15 @@ function RepositoryDetails() {
               </div>
             );
           })}
+          {(contributors.length > 0 || contributorsPage > 1) && (
+            <Pagination
+              currentPage={contributorsPage}
+              setCurrentPage={setContributorsPage}
+              dataPerPage={contributorsPerPage}
+              isDataLoading={isContributorsLoading}
+              data={contributors}
+            />
+          )}
         </section>
         <section
           className="
@@ -373,6 +402,15 @@ function RepositoryDetails() {
               </div>
             );
           })}
+          {(issues.length > 0 || issuesPage > 1) && (
+            <Pagination
+              currentPage={issuesPage}
+              setCurrentPage={setIssuesPage}
+              dataPerPage={issuesPerPage}
+              isDataLoading={isIssuesLoading}
+              data={issues}
+            />
+          )}
         </section>
         <section
           className="
@@ -454,6 +492,15 @@ function RepositoryDetails() {
               </div>
             );
           })}
+          {(pullRequests.length > 0 || pullRequestsPage > 1) && (
+            <Pagination
+              currentPage={pullRequestsPage}
+              setCurrentPage={setPullRequestsPage}
+              dataPerPage={pullRequestsPerPage}
+              isDataLoading={isPullRequestsLoading}
+              data={pullRequests}
+            />
+          )}
         </section>
       </div>
     </div>

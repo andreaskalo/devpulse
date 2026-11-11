@@ -99,11 +99,7 @@ async function getRepoIssues(owner, repo, page, perPage) {
   const requestURL = `${baseURL}/repos/${owner}/${repo}/issues?page=${page}&per_page=${perPage}`;
 
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {
@@ -135,11 +131,7 @@ async function getRepoPulls(owner, repo, page, perPage, pullState) {
   const requestURL = `${baseURL}/repos/${owner}/${repo}/pulls?page=${page}&per_page=${perPage}&state=${pullState}`;
 
   const response = await fetch(requestURL, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2026-03-10",
-      "User-Agent": "DevPulse",
-    },
+    headers: getGitHubHeaders(),
   });
 
   if (!response.ok) {
