@@ -6,6 +6,11 @@ import Pagination from "../components/Pagination";
 function RepositoryDetails() {
   const { repoOwner, repo } = useParams();
 
+  const [isSavedRepositoriesLoading, setIsSavedRepositoriesLoading] =
+    useState(false);
+  const [savedRepositoriesError, setSavedRepositoriesError] = useState(null);
+  const [savedRepository, setSavedRepository] = useState(null);
+
   const [repository, setRepository] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -34,6 +39,40 @@ function RepositoryDetails() {
   const [pullRequestsPage, setPullRequestsPage] = useState(1);
   const pullRequestsPerPage = 10;
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    if (!repository) return;
+    async function getSavedRepos() {
+      try {
+        setSavedRepositoriesError(null);
+        setIsSavedRepositoriesLoading(true);
+        const response = await fetch("/api/repos");
+
+        if (!response.ok) {
+          const error = new Error(response.statusText);
+          error.status = response.status;
+          throw error;
+        }
+
+        const data = await response.json();
+
+        const foundRepo = data.find(
+          (repo) => repo.repository_url === repository.url,
+        );
+
+        setSavedRepository(foundRepo ?? null);
+      } catch (error) {
+        console.error("error:", error);
+        setSavedRepositoriesError(error.message);
+      } finally {
+        setIsSavedRepositoriesLoading(false);
+      }
+    }
+    getSavedRepos();
+  }, [repository?.url]);
+
   useEffect(() => {
     async function fetchRepository() {
       try {
@@ -52,7 +91,7 @@ function RepositoryDetails() {
         setRepository(data);
       } catch (error) {
         setError(error.message);
-        console.log("error", error);
+        error.log("error", error);
       } finally {
         setIsLoading(false);
       }
@@ -72,8 +111,6 @@ function RepositoryDetails() {
           `/api/github/repos/${repoOwner}/${repo}/commits?page=${commitsPage}&per_page=${commitsPerPage}`,
         );
 
-        console.log("res:", response);
-
         if (!response.ok) {
           const error = new Error(response.statusText);
           error.status = response.status;
@@ -84,7 +121,7 @@ function RepositoryDetails() {
         setCommits(data);
       } catch (error) {
         setCommitsError(error.message);
-        console.log("error", error);
+        error.log("error", error);
       } finally {
         setIsCommitsLoading(false);
       }
@@ -113,7 +150,7 @@ function RepositoryDetails() {
         setContributors(data);
       } catch (error) {
         setContributorsError(error.message);
-        console.log("error", error);
+        error.log("error", error);
       } finally {
         setIsContributorsLoading(false);
       }
@@ -170,7 +207,6 @@ function RepositoryDetails() {
 
         const data = await response.json();
         setPullRequests(data);
-        console.log("data:", data);
       } catch (error) {
         setPullRequestsError(error.message);
         console.error(error);
@@ -180,6 +216,36 @@ function RepositoryDetails() {
     }
     fetchPullRequests();
   }, [repoOwner, repo]);
+
+  async function handleSaveRepository() {
+    try {
+      setSaveError(null);
+      setIsSaving(true);
+
+      const response = await fetch("/api/repos/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          repository_name: repository?.name,
+          repository_url: repository?.url,
+          owner: repository?.owner,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = new Error(response.statusText);
+        error.status = response.status;
+        throw error;
+      }
+    } catch (error) {
+      setSaveError(error.message);
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -227,21 +293,38 @@ function RepositoryDetails() {
           </div>
         </div>
 
-        <div>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
+        <div className="flex gap-2 items-center">
+          <div>
+            {saveError && <p>{saveError}</p>}
+            <button
+              onClick={handleSaveRepository}
+              disabled={isSaving || savedRepository !== null}
+              className={`px-4 py-2
+                        border border-slate-300
+                        rounded-lg
+                        font-medium
+                        hover:bg-slate-50
+                        transition ${isSaving || savedRepository ? "cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              {isSaving ? "Saving..." : savedRepository ? "Saved" : "Save"}
+            </button>
+          </div>
+          <div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
                 px-4 py-2
                 border border-slate-300
                 rounded-lg
                 font-medium
                 hover:bg-slate-50
                 transition"
-          >
-            View on GitHub
-          </a>
+            >
+              View on GitHub
+            </a>
+          </div>
         </div>
       </header>
       <div className="flex flex-col md:flex-row  w-full max-w-7xl mx-auto gap-8">

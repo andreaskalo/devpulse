@@ -9,9 +9,7 @@ async function getRepos(req, res) {
       [userId],
     );
 
-    return res.status(200).json({
-      savedRepos: result.rows,
-    });
+    return res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -60,9 +58,7 @@ async function saveRepo(req, res) {
       [userId, repository_url, owner, repository_name],
     );
 
-    return res.status(201).json({
-      savedRepo: result.rows[0],
-    });
+    return res.status(201).json(result.rows[0]);
   } catch (error) {
     if (
       error.code === "23505" &&
